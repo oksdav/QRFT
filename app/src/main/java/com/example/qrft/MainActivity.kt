@@ -2,6 +2,8 @@ package com.example.qrft
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -12,6 +14,10 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.qrft.databinding.ActivityMainBinding
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -19,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+        private const val QRCODE_SIZE = 1000
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -81,5 +88,19 @@ class MainActivity : AppCompatActivity() {
                 Log.e(this.toString(), "Use case binding failed", ex)
             }
         }, ContextCompat.getMainExecutor(this))
+    }
+
+    private fun generateQRCode(contents: String) {
+        val hints = mapOf(
+            EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.H
+        )
+        val bitMatrix = QRCodeWriter().encode(contents, BarcodeFormat.QR_CODE, QRCODE_SIZE, QRCODE_SIZE, hints)
+        val bitmap = Bitmap.createBitmap(QRCODE_SIZE, QRCODE_SIZE, Bitmap.Config.RGB_565)
+        for (y in 0 until QRCODE_SIZE) {
+            for (x in 0 until QRCODE_SIZE) {
+                bitmap.setPixel(x, y, if (bitMatrix[x, y]) Color.BLACK else Color.WHITE)
+            }
+        }
+        binding.qrcode.setImageBitmap(bitmap)
     }
 }

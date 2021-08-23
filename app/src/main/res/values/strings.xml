@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">QRFT</string>
+    <string name="qrcode">QR Code</string>
 </resources>
