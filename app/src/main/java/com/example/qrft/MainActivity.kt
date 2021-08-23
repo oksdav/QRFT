@@ -74,9 +74,7 @@ class MainActivity : AppCompatActivity() {
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
             val imageAnalyzer = ImageAnalysis.Builder().build()
-            imageAnalyzer.setAnalyzer(cameraExecutor, QRCodeAnalyzer {
-                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-            })
+            imageAnalyzer.setAnalyzer(cameraExecutor, QRCodeAnalyzer { handleScannedQRCode(it) })
 
             try {
                 // Unbind use cases before rebinding
@@ -102,5 +100,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.qrcode.setImageBitmap(bitmap)
+    }
+
+    private fun handleScannedQRCode(contents: String) {
+        Toast.makeText(this, contents, Toast.LENGTH_SHORT).show()
+        val (sequenceNumber, data) = extractSequenceNumber(contents)
+        //TODO: Generate QR Code with the next sequence number
+        saveToFile(data)
+    }
+
+    private fun extractSequenceNumber(contents: String): Pair<Int, String> {
+        //TODO
+        return Pair(0, contents)
+    }
+
+    private fun saveToFile(data: String) {
+        //TODO
     }
 }
