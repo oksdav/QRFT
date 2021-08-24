@@ -1,11 +1,16 @@
 package com.example.qrft
 
 import android.Manifest
+import com.example.qrft.R
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.EditText
+import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
@@ -18,8 +23,10 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import java.io.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -30,11 +37,16 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var cameraExecutor: ExecutorService
+    private lateinit var titleText: EditText
+    private lateinit var editText: EditText
+    private lateinit var filesList : ListView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        editText = findViewById(R.id.editText)
+        titleText = findViewById(R.id.titleText)
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -102,5 +114,43 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.qrcode.setImageBitmap(bitmap)
+    }
+
+    fun saveTextFile(view: View) {
+        try {
+            val filename = titleText.text.toString() + ".txt"
+            val fileOutputStream: FileOutputStream =
+                openFileOutput(filename, Context.MODE_PRIVATE)
+            val outputWriter = OutputStreamWriter(fileOutputStream)
+            outputWriter.write(editText.text.toString())
+            outputWriter.close()
+            Toast.makeText(baseContext, "File saved successfully!", Toast.LENGTH_SHORT).show()
+        }
+        catch (e: Exception) {
+            Toast.makeText(baseContext, "Error, could not save file!", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+    }
+
+    fun readTextFile(view: View) {
+        try {
+            val fileInputStream: FileInputStream =
+                openFileInput(titleText.text.toString() + ".txt")
+            val inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
+            val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
+            val stringBuilder: StringBuilder = StringBuilder();
+            var text: String? = null;
+            while(run {
+                    text = bufferedReader.readLine()
+                    text
+                } != null) {
+                stringBuilder.append(text)
+            }
+            editText.setText(stringBuilder.toString()).toString()
+        }
+        catch (e: Exception) {
+            Toast.makeText(baseContext, "Error, could not read file!", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
     }
 }
