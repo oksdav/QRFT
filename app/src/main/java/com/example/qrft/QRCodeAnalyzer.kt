@@ -9,7 +9,7 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 
-class QRCodeAnalyzer(private val receiver: Receiver) : ImageAnalysis.Analyzer {
+class QRCodeAnalyzer(private val communicator: Communicator) : ImageAnalysis.Analyzer {
     @SuppressLint("UnsafeOptInUsageError")
     override fun analyze(image: ImageProxy) {
         val mediaImage = image.image
@@ -20,7 +20,7 @@ class QRCodeAnalyzer(private val receiver: Receiver) : ImageAnalysis.Analyzer {
             BarcodeScanning.getClient(options).process(inputImage)
                 .addOnSuccessListener { barcodes ->
                     for (barcode in barcodes) {
-                        barcode.rawValue?.let { receiver.receive(it) }
+                        barcode.rawValue?.let { communicator.handle(it) }
                     }
                 }
                 .addOnFailureListener {

@@ -23,19 +23,24 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var cameraExecutor: ExecutorService
+    private lateinit var imageAnalysis: ImageAnalysis
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        cameraExecutor = Executors.newSingleThreadExecutor()
+        imageAnalysis = ImageAnalysis.Builder().build()
+
+        val communicator = Receiver(baseContext, imageAnalysis, QRCodeGenerator(binding))
+        imageAnalysis.setAnalyzer(cameraExecutor, QRCodeAnalyzer(communicator))
+
         if (allPermissionsGranted()) {
-            startCamera()
+            startCamera(imageAnalysis)
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
-
-        cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
     override fun onDestroy() {
@@ -47,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
-                startCamera()
+                startCamera(imageAnalysis)
             } else {
                 Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show()
                 finish()
@@ -59,26 +64,19 @@ class MainActivity : AppCompatActivity() {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun startCamera() {
+    private fun startCamera(imageAnalysis: ImageAnalysis) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
-            val imageAnalyzer = ImageAnalysis.Builder().build().also {
-                it.setAnalyzer(
-                    cameraExecutor,
-                    QRCodeAnalyzer(Receiver(baseContext, cameraExecutor, QRCodeGenerator(binding)))
-                )
-            }
-
             try {
                 // Unbind use cases before rebinding
                 cameraProvider.unbindAll()
 
                 // Bind use cases to camera
-                cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_FRONT_CAMERA, imageAnalyzer)
+                cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_FRONT_CAMERA, imageAnalysis)
             } catch (ex: Exception) {
                 Log.e(this.toString(), "Use case binding failed", ex)
             }

@@ -2,13 +2,13 @@ package com.example.qrft
 
 import android.content.Context
 import android.widget.Toast
-import java.util.concurrent.ExecutorService
+import androidx.camera.core.ImageAnalysis
 
 class Receiver(
     private val context: Context,
-    private val cameraExecutor: ExecutorService,
+    private val imageAnalysis: ImageAnalysis,
     private val qrCodeGenerator: QRCodeGenerator
-) {
+) : Communicator {
     companion object {
         private const val LAST_SEQUENCE_NUMBER = 2
     }
@@ -16,7 +16,7 @@ class Receiver(
     private var sequenceNumber = 0
     private var dummyFile = ""
 
-    fun receive(contents: String) {
+    override fun handle(contents: String) {
         val (sequenceNumber, data) = extractSequenceNumber(contents)
         Toast.makeText(context, "Sequence number: $sequenceNumber | Data: $data", Toast.LENGTH_SHORT).show()
 
@@ -24,7 +24,7 @@ class Receiver(
             LAST_SEQUENCE_NUMBER -> {
                 handleChunk(data, LAST_SEQUENCE_NUMBER)
                 Toast.makeText(context, dummyFile, Toast.LENGTH_LONG).show()
-                cameraExecutor.shutdown()
+                imageAnalysis.clearAnalyzer()
             }
             this.sequenceNumber -> {
                 handleChunk(data, 1 - sequenceNumber)
