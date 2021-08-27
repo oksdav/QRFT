@@ -33,8 +33,8 @@ class MainActivity : AppCompatActivity() {
         cameraExecutor = Executors.newSingleThreadExecutor()
         imageAnalysis = ImageAnalysis.Builder().build()
 
-        val communicator = Receiver(baseContext, imageAnalysis, QRCodeGenerator(binding))
-        imageAnalysis.setAnalyzer(cameraExecutor, QRCodeAnalyzer(communicator))
+        val receiver = Receiver(binding, baseContext, imageAnalysis)
+        imageAnalysis.setAnalyzer(cameraExecutor, receiver)
 
         if (allPermissionsGranted()) {
             startCamera(imageAnalysis)
