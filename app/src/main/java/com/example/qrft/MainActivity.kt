@@ -26,10 +26,14 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
         private const val QRCODE_SIZE = 1000
+        private const val LAST_SEQUENCE_NUMBER = 2
     }
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var cameraExecutor: ExecutorService
+
+    private var sequenceNumber = 0
+    private var dummyFile = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,18 +107,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleScannedQRCode(contents: String) {
-        Toast.makeText(this, contents, Toast.LENGTH_SHORT).show()
         val (sequenceNumber, data) = extractSequenceNumber(contents)
-        //TODO: Generate QR Code with the next sequence number
-        saveToFile(data)
+        Toast.makeText(this, "Sequence number: $sequenceNumber | Data: $data", Toast.LENGTH_SHORT).show()
+
+        when (sequenceNumber) {
+            LAST_SEQUENCE_NUMBER -> {
+                handleChunk(data, LAST_SEQUENCE_NUMBER)
+                Toast.makeText(baseContext, dummyFile, Toast.LENGTH_LONG).show()
+                cameraExecutor.shutdown()
+            }
+            this.sequenceNumber -> {
+                handleChunk(data, 1 - sequenceNumber)
+            }
+        }
     }
 
     private fun extractSequenceNumber(contents: String): Pair<Int, String> {
-        //TODO
-        return Pair(0, contents)
+        return Pair(contents.take(1).toInt(), contents.drop(1))
+    }
+
+    private fun handleChunk(data: String, nextSequenceNumber: Int) {
+        saveToFile(data)
+        this.sequenceNumber = nextSequenceNumber
+        generateQRCode(nextSequenceNumber.toString())
     }
 
     private fun saveToFile(data: String) {
         //TODO
+        dummyFile += data
     }
 }
