@@ -4,6 +4,8 @@ import android.content.Context
 import android.widget.Toast
 import androidx.camera.core.ImageAnalysis
 import com.example.qrft.databinding.ActivityMainBinding
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 
 class Receiver(
     binding: ActivityMainBinding,
@@ -15,7 +17,8 @@ class Receiver(
     }
 
     private var sequenceNumber = 0
-    private var dummyFile = ""
+    private var dataToSave = ""
+    private val fileHandler = FileHandler(context)
 
     override fun handleScannedQRCode(contents: String) {
         val (sequenceNumber, data) = extractSequenceNumber(contents)
@@ -24,8 +27,10 @@ class Receiver(
         when (sequenceNumber) {
             LAST_SEQUENCE_NUMBER -> {
                 handleChunk(data, LAST_SEQUENCE_NUMBER)
-                Toast.makeText(context, dummyFile, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, dataToSave, Toast.LENGTH_LONG).show()
                 imageAnalysis.clearAnalyzer()
+                // todo: handle sending title
+                fileHandler.saveTextFile("~~~~~~~~~~~~ADD_TITLE_HERE~~~~~~~~~~~~", dataToSave)
             }
             this.sequenceNumber -> {
                 handleChunk(data, 1 - sequenceNumber)
@@ -39,13 +44,12 @@ class Receiver(
     }
 
     private fun handleChunk(data: String, nextSequenceNumber: Int) {
-        saveToFile(data)
+        collectDataToSave(data)
         this.sequenceNumber = nextSequenceNumber
         generateQRCode(nextSequenceNumber.toString())
     }
 
-    private fun saveToFile(data: String) {
-        //TODO
-        dummyFile += data
+    private fun collectDataToSave(data: String) {
+        dataToSave += data
     }
 }
