@@ -19,7 +19,7 @@ class Sender(
     private lateinit var fileData : String
 
 
-    public fun send(fileName: String) {
+    fun send(fileName: String) {
         fileData = fileHandler.readTextFile(fileName).toString()
         chunks = splitDataToChunks(fileData)
 
