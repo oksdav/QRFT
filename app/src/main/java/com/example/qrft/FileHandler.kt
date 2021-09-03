@@ -11,9 +11,8 @@ class FileHandler (
 ){
     fun saveTextFile(title: String, text: String) {
         try {
-            val filename = "$title.txt"
             val fileOutputStream: FileOutputStream =
-                context.openFileOutput(filename, Context.MODE_PRIVATE)
+                context.openFileOutput(title, Context.MODE_PRIVATE)
             val outputWriter = OutputStreamWriter(fileOutputStream)
             outputWriter.write(text)
             outputWriter.close()
@@ -27,12 +26,11 @@ class FileHandler (
 
     fun readTextFile(title: String): String? {
         try {
-            val fileInputStream: FileInputStream =
-                context.openFileInput("$title.txt")
-            val inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
-            val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
-            val stringBuilder: StringBuilder = StringBuilder();
-            var text: String? = null;
+            val fileInputStream: FileInputStream = context.openFileInput(title)
+            val inputStreamReader = InputStreamReader(fileInputStream)
+            val bufferedReader = BufferedReader(inputStreamReader)
+            val stringBuilder: StringBuilder = StringBuilder()
+            var text: String?
             while(run {
                     text = bufferedReader.readLine()
                     text

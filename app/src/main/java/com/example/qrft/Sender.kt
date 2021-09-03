@@ -5,7 +5,7 @@ import com.example.qrft.databinding.ActivityMainBinding
 
 class Sender(
     binding: ActivityMainBinding,
-    private val context: Context
+    context: Context
 ) : QRCodeHandler(binding) {
     companion object {
         private const val LAST_SEQUENCE_NUMBER = 2
@@ -34,19 +34,20 @@ class Sender(
 
     private fun splitDataToChunks(data: String): Array<String> {
         val chunks = emptyArray<String>()
-        val i = 0
+        var i = 0
         while (i < data.length) {
             setSequenceNumber(data, i)
             val nextChunk = data.slice(IntRange(i,
-                    (i + Companion.QRCODE_SIZE_IN_BITS).coerceAtMost(data.length))) + sequenceNumber
+                    (i + QRCODE_SIZE_IN_BITS).coerceAtMost(data.length)))
 
             chunks.plus(nextChunk)
+            i += QRCODE_SIZE_IN_BITS
         }
-        return chunks;
+        return chunks
     }
 
     private fun setSequenceNumber(data: String, index: Int) {
-        sequenceNumber = if (index + Companion.QRCODE_SIZE_IN_BITS > data.length) {
+        sequenceNumber = if (index + QRCODE_SIZE_IN_BITS > data.length) {
             LAST_SEQUENCE_NUMBER
         } else {
             1 - sequenceNumber
