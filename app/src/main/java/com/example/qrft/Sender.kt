@@ -38,7 +38,7 @@ class Sender(
         while (i < data.length) {
             setSequenceNumber(data, i)
             val nextChunk = data.slice(IntRange(i,
-                    (i + QRCODE_SIZE_IN_BITS).coerceAtMost(data.length)))
+                    (i + QRCODE_SIZE_IN_BITS).coerceAtMost(data.length - 1)))
 
             chunks.plus(nextChunk)
             i += QRCODE_SIZE_IN_BITS

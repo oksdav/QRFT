@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imageAnalysis: ImageAnalysis
     private lateinit var titleText: EditText
     private lateinit var editText: EditText
+    private lateinit var chosenFile: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,7 +84,7 @@ class MainActivity : AppCompatActivity() {
 
     fun saveTextFile(view: View) {
         try {
-            val filename = titleText.text.toString() + ".txt"
+            val filename = titleText.text.toString()
             val fileOutputStream: FileOutputStream =
                 openFileOutput(filename, Context.MODE_PRIVATE)
             val outputWriter = OutputStreamWriter(fileOutputStream)
@@ -100,11 +101,11 @@ class MainActivity : AppCompatActivity() {
     fun readTextFile(view: View) {
         try {
             val fileInputStream: FileInputStream =
-                openFileInput(titleText.text.toString() + ".txt")
+                openFileInput(titleText.text.toString())
             val inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
             val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
-            val stringBuilder: StringBuilder = StringBuilder();
-            var text: String? = null;
+            val stringBuilder: StringBuilder = StringBuilder()
+            var text: String? = null
             while(run {
                     text = bufferedReader.readLine()
                     text
@@ -119,7 +120,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun onSend(fileName: String) {
+    fun onSend(view: View) {
         cameraExecutor = Executors.newSingleThreadExecutor()
         imageAnalysis = ImageAnalysis.Builder().build()
 
@@ -127,19 +128,23 @@ class MainActivity : AppCompatActivity() {
         imageAnalysis.setAnalyzer(cameraExecutor, sender)
 
         if (allPermissionsGranted()) {
-            sender.send(fileName)
-            startCamera(imageAnalysis)
+            if(this::chosenFile.isInitialized && chosenFile.isFile) {
+                sender.send(chosenFile.name)
+                startCamera(imageAnalysis)
+            } else {
+                Toast.makeText(baseContext, "Please choose a file to send", Toast.LENGTH_SHORT).show()
+            }
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
 
+
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-    fun onReceive() {
+    fun onReceive(view: View) {
         cameraExecutor = Executors.newSingleThreadExecutor()
         imageAnalysis = ImageAnalysis.Builder().build()
-
         val receiver = Receiver(binding, baseContext, imageAnalysis)
         imageAnalysis.setAnalyzer(cameraExecutor, receiver)
 
@@ -150,5 +155,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
+    }
+
+    fun onChoose(view: View) {
+        chooseFile(view)
+    }
+
+     private fun chooseFile(view: View) {
+        val fileChooser = FileChooser(this@MainActivity)
+        fileChooser.setFileListener { file ->
+            chosenFile = file
+            titleText.setText(chosenFile.name.toString())
+        }
+        fileChooser.showDialog()
     }
 }
