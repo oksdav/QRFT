@@ -81,8 +81,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun saveTextFile(@Suppress("UNUSED_PARAMETER") view: View) {
-        fileHandler.saveTextFile(titleText.text.toString() ,editText.text.toString())
-        Toast.makeText(baseContext, "File saved successfully!", Toast.LENGTH_SHORT).show()
+        if(fileHandler.saveTextFile(titleText.text.toString() ,editText.text.toString())) {
+            Toast.makeText(baseContext, "File saved successfully!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(baseContext, "File could not be saved!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     fun readTextFile(@Suppress("UNUSED_PARAMETER") view: View) {
