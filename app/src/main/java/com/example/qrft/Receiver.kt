@@ -17,7 +17,6 @@ class Receiver(
     private var isHandledTitle = false
     private var sequenceNumber = 0
     private lateinit var fileTitle: String
-    private var dataToSave = ""
     private val fileHandler = FileHandler(context)
 
     override fun handleScannedQRCode(contents: String) {
@@ -28,9 +27,8 @@ class Receiver(
         } else when (sequenceNumber) {
             LAST_SEQUENCE_NUMBER -> {
                 handleChunk(data, LAST_SEQUENCE_NUMBER)
-                Toast.makeText(context, dataToSave, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Finished reading file", Toast.LENGTH_LONG).show()
                 imageAnalysis.clearAnalyzer()
-                fileHandler.saveTextFile(fileTitle, dataToSave)
             }
             this.sequenceNumber -> {
                 handleChunk(data, 1 - sequenceNumber)
@@ -49,12 +47,8 @@ class Receiver(
     }
 
     private fun handleChunk(data: String, nextSequenceNumber: Int) {
-        collectDataToSave(data)
+        fileHandler.saveTextChunk(fileTitle, data)
         this.sequenceNumber = nextSequenceNumber
         generateQRCode(nextSequenceNumber.toString())
-    }
-
-    private fun collectDataToSave(data: String) {
-        dataToSave += data
     }
 }

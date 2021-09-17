@@ -18,6 +18,15 @@ class FileHandler(
         return file.isFile
     }
 
+    fun saveTextChunk(fileName: String, textChunk: String) {
+        val fullFileName = FILE_PATH_NAME + fileName
+        val file = File(fullFileName)
+        if(!file.isFile) {
+            file.createNewFile()
+        }
+        file.appendText(textChunk)
+    }
+
     fun readTextFile(fileName: String): String? {
         val fullFileName = FILE_PATH_NAME + fileName
         val file = File(fullFileName)
