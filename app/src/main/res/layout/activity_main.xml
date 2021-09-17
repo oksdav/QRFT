@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ScrollView01"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
-    <RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:context=".MainActivity"
         tools:ignore="ExtraText">
@@ -21,88 +23,14 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/qrcode" />
 
-        <EditText
-            android:id="@+id/titleText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/qrcode"
-            android:layout_marginTop="88dp"
-            android:ems="10"
-            android:hint="@string/enter_the_files_name"
-            app:layout_constraintBottom_toTopOf="@+id/editText"
-            tools:layout_editor_absoluteX="0dp"
-            tools:ignore="Autofill"
-            android:inputType="text">
-            <requestFocus />
-        </EditText>
-
-        <EditText
-            android:id="@+id/editText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/titleText"
-            android:layout_marginTop="0dp"
-            android:ems="10"
-            android:hint="@string/enter_the_text_to_insert"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="137dp"
-            tools:ignore="Autofill"
-            android:inputType="text">
-            <requestFocus />
-        </EditText>
-
-
-        <Button
-            android:id="@+id/writeButton"
-            android:layout_width="175dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/editText"
-            android:layout_alignEnd="@+id/readButton"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="74dp"
-            android:layout_marginEnd="-196dp"
-            android:layout_marginBottom="5dp"
-            android:background="@android:color/holo_orange_light"
-            android:onClick="saveTextFile"
-            android:text="@string/save_file"
-            android:textColor="@android:color/background_dark"
-            android:textStyle="bold"
-            tools:layout_editor_absoluteX="151dp"
-            tools:layout_editor_absoluteY="200dp"
-            tools:ignore="UsingOnClickInXml" />
-
-        <Button
-            android:id="@+id/readButton"
-            android:layout_width="188dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/editText"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="18dp"
-            android:layout_marginTop="73dp"
-            android:layout_marginEnd="5dp"
-            android:layout_marginBottom="5dp"
-            android:background="@android:color/holo_orange_light"
-            android:onClick="readTextFile"
-            android:text="@string/read_file"
-            android:textColor="@android:color/background_dark"
-            android:textStyle="bold"
-            tools:layout_editor_absoluteX="151dp"
-            tools:layout_editor_absoluteY="200dp"
-            tools:ignore="UsingOnClickInXml" />
 
         <Button
             android:id="@+id/sendFile"
-            android:layout_width="175dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/readButton"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="225dp"
-            android:layout_marginTop="13dp"
-            android:layout_marginEnd="10dp"
+            android:layout_below="@+id/qrcode"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="394dp"
             android:layout_marginBottom="5dp"
             android:background="@android:color/holo_orange_light"
             android:onClick="onSend"
@@ -114,46 +42,23 @@
             tools:layout_editor_absoluteY="200dp" />
 
         <Button
-            android:id="@+id/chooseFile"
-            android:layout_width="189dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/readButton"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="18dp"
-            android:layout_marginTop="14dp"
-            android:layout_marginEnd="204dp"
-            android:layout_marginBottom="5dp"
-            android:background="@android:color/holo_orange_light"
-            android:onClick="onChoose"
-            android:text="@string/choose_a_file"
-            android:textColor="@android:color/background_dark"
-            android:textStyle="bold"
-            tools:ignore="UsingOnClickInXml"
-            tools:layout_editor_absoluteX="151dp"
-            tools:layout_editor_absoluteY="200dp" />
-
-        <Button
             android:id="@+id/receiveFile"
-            android:layout_width="178dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/readButton"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="124dp"
-            android:layout_marginTop="87dp"
-            android:layout_marginEnd="108dp"
+            android:layout_below="@+id/qrcode"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="331dp"
+            android:layout_marginEnd="-411dp"
             android:layout_marginBottom="5dp"
+            android:layout_toStartOf="@+id/sendFile"
             android:background="@android:color/holo_orange_light"
             android:onClick="onReceive"
             android:text="@string/receive_a_file"
             android:textColor="@android:color/background_dark"
             android:textStyle="bold"
+            tools:ignore="UsingOnClickInXml"
             tools:layout_editor_absoluteX="151dp"
-            tools:layout_editor_absoluteY="200dp"
-            tools:ignore="UsingOnClickInXml" />
+            tools:layout_editor_absoluteY="200dp" />
 
     </RelativeLayout>
 </ScrollView>

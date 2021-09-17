@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
@@ -30,18 +29,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var imageAnalysis: ImageAnalysis
-    private lateinit var fileHandler: FileHandler
-    private lateinit var titleText: EditText
-    private lateinit var editText: EditText
     private lateinit var chosenFile: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        fileHandler = FileHandler(baseContext)
-        editText = findViewById(R.id.editText)
-        titleText = findViewById(R.id.titleText)
     }
 
     override fun onDestroy() {
@@ -84,37 +77,16 @@ class MainActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    fun saveTextFile(@Suppress("UNUSED_PARAMETER") view: View) {
-        if(fileHandler.saveTextFile(titleText.text.toString() ,editText.text.toString())) {
-            Toast.makeText(baseContext, "File saved successfully!", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(baseContext, "File could not be saved!", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    fun readTextFile(@Suppress("UNUSED_PARAMETER") view: View) {
-        val readText = fileHandler.readTextFile(titleText.text.toString())
-        if(readText.equals(null)) {
-            Toast.makeText(baseContext, "Error, could not read file!", Toast.LENGTH_SHORT).show()
-        } else {
-            editText.setText(readText)
-        }
-    }
-
     fun onSend(@Suppress("UNUSED_PARAMETER") view: View) {
         cameraExecutor = Executors.newSingleThreadExecutor()
         imageAnalysis = ImageAnalysis.Builder().build()
 
-        val sender = Sender(binding)
-        imageAnalysis.setAnalyzer(cameraExecutor, sender)
-
         if (allPermissionsGranted()) {
-            sender.send(chosenFile)
-            startCamera(imageAnalysis)
-        } else {
+            chooseAndSendFile()
+        }
+        else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
-
 
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
@@ -134,21 +106,29 @@ class MainActivity : AppCompatActivity() {
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-    fun onChoose(@Suppress("UNUSED_PARAMETER") view: View) {
-         var chooseFile = Intent(Intent.ACTION_GET_CONTENT)
-         chooseFile.type = "*/*"
-         chooseFile = Intent.createChooser(chooseFile, "Choose a file")
-         startActivityForResult(chooseFile, PICK_FILE_RESULT_CODE)
+    private fun chooseAndSendFile() {
+        var chooseFile = Intent(Intent.ACTION_GET_CONTENT)
+        chooseFile.type = "*/*"
+        chooseFile = Intent.createChooser(chooseFile, "Choose a file")
+        startActivityForResult(chooseFile, PICK_FILE_RESULT_CODE)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_FILE_RESULT_CODE
             && resultCode == Activity.RESULT_OK) {
-                val resultFile = data?.data?.path
-                if (resultFile != null) {
-                    chosenFile = File(resultFile)
-                }
+            val resultFile = data?.data?.path
+            if (resultFile != null) {
+                chosenFile = File(resultFile)
+                sendFile()
             }
         }
     }
+
+    private fun sendFile() {
+        val sender = Sender(binding)
+        imageAnalysis.setAnalyzer(cameraExecutor, sender)
+        sender.send(chosenFile)
+        startCamera(imageAnalysis)
+    }
+}
