@@ -1,7 +1,6 @@
 package com.example.qrft
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -23,12 +22,11 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
-        private const val QRCODE_SIZE = 1000
     }
-
     private lateinit var binding: ActivityMainBinding
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var imageAnalysis: ImageAnalysis
+    private lateinit var fileHandler: FileHandler
     private lateinit var titleText: EditText
     private lateinit var editText: EditText
     private lateinit var chosenFile: File
@@ -37,9 +35,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        fileHandler = FileHandler(baseContext)
         editText = findViewById(R.id.editText)
         titleText = findViewById(R.id.titleText)
-
     }
 
     override fun onDestroy() {
@@ -82,45 +80,21 @@ class MainActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    fun saveTextFile(view: View) {
-        try {
-            val filename = titleText.text.toString()
-            val fileOutputStream: FileOutputStream =
-                openFileOutput(filename, Context.MODE_PRIVATE)
-            val outputWriter = OutputStreamWriter(fileOutputStream)
-            outputWriter.write(editText.text.toString())
-            outputWriter.close()
-            Toast.makeText(baseContext, "File saved successfully!", Toast.LENGTH_SHORT).show()
-        }
-        catch (e: Exception) {
-            Toast.makeText(baseContext, "Error, could not save file!", Toast.LENGTH_SHORT).show()
-            e.printStackTrace()
-        }
+    fun saveTextFile(@Suppress("UNUSED_PARAMETER") view: View) {
+        fileHandler.saveTextFile(titleText.text.toString() ,editText.text.toString())
+        Toast.makeText(baseContext, "File saved successfully!", Toast.LENGTH_SHORT).show()
     }
 
-    fun readTextFile(view: View) {
-        try {
-            val fileInputStream: FileInputStream =
-                openFileInput(titleText.text.toString())
-            val inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
-            val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
-            val stringBuilder: StringBuilder = StringBuilder()
-            var text: String? = null
-            while(run {
-                    text = bufferedReader.readLine()
-                    text
-                } != null) {
-                stringBuilder.append(text)
-            }
-            editText.setText(stringBuilder.toString()).toString()
-        }
-        catch (e: Exception) {
+    fun readTextFile(@Suppress("UNUSED_PARAMETER") view: View) {
+        val readText = fileHandler.readTextFile(titleText.text.toString())
+        if(readText.equals(null)) {
             Toast.makeText(baseContext, "Error, could not read file!", Toast.LENGTH_SHORT).show()
-            e.printStackTrace()
+        } else {
+            editText.setText(readText)
         }
     }
 
-    fun onSend(view: View) {
+    fun onSend(@Suppress("UNUSED_PARAMETER") view: View) {
         cameraExecutor = Executors.newSingleThreadExecutor()
         imageAnalysis = ImageAnalysis.Builder().build()
 
@@ -142,7 +116,7 @@ class MainActivity : AppCompatActivity() {
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-    fun onReceive(view: View) {
+    fun onReceive(@Suppress("UNUSED_PARAMETER") view: View) {
         cameraExecutor = Executors.newSingleThreadExecutor()
         imageAnalysis = ImageAnalysis.Builder().build()
         val receiver = Receiver(binding, baseContext, imageAnalysis)
@@ -161,7 +135,7 @@ class MainActivity : AppCompatActivity() {
         chooseFile(view)
     }
 
-     private fun chooseFile(view: View) {
+     private fun chooseFile(@Suppress("UNUSED_PARAMETER") view: View) {
         val fileChooser = FileChooser(this@MainActivity)
         fileChooser.setFileListener { file ->
             chosenFile = file

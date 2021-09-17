@@ -3,7 +3,6 @@ package com.example.qrft;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
-import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
@@ -11,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
@@ -21,8 +21,8 @@ public class FileChooser {
     private static final String FILE_PATH_NAME = "/data/data/com.example.qrft/files";
 
     private final Activity activity;
-    private ListView list;
-    private Dialog dialog;
+    private final ListView list;
+    private final Dialog dialog;
     private File currentPath;
 
     // filter on file extension

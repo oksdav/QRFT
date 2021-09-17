@@ -2,48 +2,24 @@ package com.example.qrft
 
 
 import android.content.Context
-import android.widget.Toast
-import java.io.*
+import java.io.File
 
 
-class FileHandler (
-    private val context: Context
+class FileHandler(
+    context: Context,
+    private val FILE_PATH_NAME: String = context.filesDir.path + "/"
 ){
-    fun saveTextFile(title: String, text: String) {
-        try {
-            val fileOutputStream: FileOutputStream =
-                context.openFileOutput(title, Context.MODE_PRIVATE)
-            val outputWriter = OutputStreamWriter(fileOutputStream)
-            outputWriter.write(text)
-            outputWriter.close()
-            Toast.makeText(context, "File saved successfully!", Toast.LENGTH_SHORT).show()
-        }
-        catch (e: Exception) {
-            Toast.makeText(context, "Error, could not save file!", Toast.LENGTH_SHORT).show()
-            e.printStackTrace()
-        }
+    fun saveTextFile(fileName: String, text: String) {
+        val fullFileName = FILE_PATH_NAME + fileName
+        File(fullFileName).writeText(text)
     }
 
-    fun readTextFile(title: String): String? {
-        try {
-            val fileInputStream: FileInputStream = context.openFileInput(title)
-            val inputStreamReader = InputStreamReader(fileInputStream)
-            val bufferedReader = BufferedReader(inputStreamReader)
-            val stringBuilder: StringBuilder = StringBuilder()
-            var text: String?
-            while(run {
-                    text = bufferedReader.readLine()
-                    text
-                } != null) {
-                stringBuilder.append(text)
-            }
-            return stringBuilder.toString()
+    fun readTextFile(fileName: String): String? {
+        val fullFileName = FILE_PATH_NAME + fileName
+        return if(File(fullFileName).exists()) {
+            File(fullFileName).readText()
+        } else {
+            null
         }
-        catch (e: Exception) {
-            Toast.makeText(context, "Error, could not read file!", Toast.LENGTH_SHORT).show()
-            e.printStackTrace()
-
-        }
-        return null
     }
 }
