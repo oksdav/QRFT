@@ -17,7 +17,6 @@ import java.util.Arrays;
 
 public class FileChooser {
     private static final String PARENT_DIR = "..";
-    @SuppressLint("SdCardPath")
     private static final String FILE_PATH_NAME = "/data/data/com.example.qrft/files";
 
     private final Activity activity;

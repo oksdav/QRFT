@@ -101,12 +101,12 @@ class MainActivity : AppCompatActivity() {
         cameraExecutor = Executors.newSingleThreadExecutor()
         imageAnalysis = ImageAnalysis.Builder().build()
 
-        val sender = Sender(binding, baseContext)
+        val sender = Sender(binding)
         imageAnalysis.setAnalyzer(cameraExecutor, sender)
 
         if (allPermissionsGranted()) {
             if(this::chosenFile.isInitialized && chosenFile.isFile) {
-                sender.send(chosenFile.name)
+                sender.send(chosenFile)
                 startCamera(imageAnalysis)
             } else {
                 Toast.makeText(baseContext, "Please choose a file to send", Toast.LENGTH_SHORT).show()
