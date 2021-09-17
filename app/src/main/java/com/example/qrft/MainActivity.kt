@@ -1,6 +1,8 @@
 package com.example.qrft
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -14,13 +16,15 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.qrft.databinding.ActivityMainBinding
-import java.io.*
+import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+
 
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
+        private const val PICK_FILE_RESULT_CODE = 8778
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
     private lateinit var binding: ActivityMainBinding
@@ -105,12 +109,8 @@ class MainActivity : AppCompatActivity() {
         imageAnalysis.setAnalyzer(cameraExecutor, sender)
 
         if (allPermissionsGranted()) {
-            if(this::chosenFile.isInitialized && chosenFile.isFile) {
-                sender.send(chosenFile)
-                startCamera(imageAnalysis)
-            } else {
-                Toast.makeText(baseContext, "Please choose a file to send", Toast.LENGTH_SHORT).show()
-            }
+            sender.send(chosenFile)
+            startCamera(imageAnalysis)
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
@@ -134,16 +134,21 @@ class MainActivity : AppCompatActivity() {
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-    fun onChoose(view: View) {
-        chooseFile(view)
+    fun onChoose(@Suppress("UNUSED_PARAMETER") view: View) {
+         var chooseFile = Intent(Intent.ACTION_GET_CONTENT)
+         chooseFile.type = "*/*"
+         chooseFile = Intent.createChooser(chooseFile, "Choose a file")
+         startActivityForResult(chooseFile, PICK_FILE_RESULT_CODE)
     }
 
-     private fun chooseFile(@Suppress("UNUSED_PARAMETER") view: View) {
-        val fileChooser = FileChooser(this@MainActivity)
-        fileChooser.setFileListener { file ->
-            chosenFile = file
-            titleText.setText(chosenFile.name.toString())
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_FILE_RESULT_CODE
+            && resultCode == Activity.RESULT_OK) {
+                val resultFile = data?.data?.path
+                if (resultFile != null) {
+                    chosenFile = File(resultFile)
+                }
+            }
         }
-        fileChooser.showDialog()
     }
-}
