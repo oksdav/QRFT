@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         resultLauncher.launch(chooseFile)
     }
 
-    var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
             val resultFile = data?.data?.path
