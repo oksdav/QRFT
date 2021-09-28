@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -23,7 +24,6 @@ import java.util.concurrent.Executors
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
-        private const val PICK_FILE_RESULT_CODE = 8778
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
     private lateinit var binding: ActivityMainBinding
@@ -110,13 +110,12 @@ class MainActivity : AppCompatActivity() {
         var chooseFile = Intent(Intent.ACTION_GET_CONTENT)
         chooseFile.type = "*/*"
         chooseFile = Intent.createChooser(chooseFile, "Choose a file")
-        startActivityForResult(chooseFile, PICK_FILE_RESULT_CODE)
+        resultLauncher.launch(chooseFile)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PICK_FILE_RESULT_CODE
-            && resultCode == Activity.RESULT_OK) {
+    var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
             val resultFile = data?.data?.path
             if (resultFile != null) {
                 chosenFile = File(resultFile)
