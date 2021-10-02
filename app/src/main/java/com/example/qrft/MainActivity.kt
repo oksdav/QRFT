@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendFile() {
-        val sender = Sender(binding)
+        val sender = Sender(binding, imageAnalysis)
         imageAnalysis.setAnalyzer(cameraExecutor, sender)
         sender.send(chosenFile)
         startCamera(imageAnalysis)
