@@ -2,9 +2,12 @@ package com.example.qrft
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -29,18 +32,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        cameraExecutor = Executors.newSingleThreadExecutor()
-        imageAnalysis = ImageAnalysis.Builder().build()
-
-        val receiver = Receiver(binding, baseContext, imageAnalysis)
-        imageAnalysis.setAnalyzer(cameraExecutor, receiver)
-
-        if (allPermissionsGranted()) {
-            startCamera(imageAnalysis)
-        } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-        }
     }
 
     override fun onDestroy() {
@@ -81,5 +72,44 @@ class MainActivity : AppCompatActivity() {
                 Log.e(this.toString(), "Use case binding failed", ex)
             }
         }, ContextCompat.getMainExecutor(this))
+    }
+
+    fun onSend(@Suppress("UNUSED_PARAMETER") view: View) {
+        cameraExecutor = Executors.newSingleThreadExecutor()
+        imageAnalysis = ImageAnalysis.Builder().build()
+
+        if (allPermissionsGranted()) {
+            getContent.launch("*/*")
+        } else {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+        }
+
+        cameraExecutor = Executors.newSingleThreadExecutor()
+    }
+
+    fun onReceive(@Suppress("UNUSED_PARAMETER") view: View) {
+        cameraExecutor = Executors.newSingleThreadExecutor()
+        imageAnalysis = ImageAnalysis.Builder().build()
+        val receiver = Receiver(binding, baseContext, imageAnalysis)
+        imageAnalysis.setAnalyzer(cameraExecutor, receiver)
+
+        if (allPermissionsGranted()) {
+            startCamera(imageAnalysis)
+        } else {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+        }
+
+        cameraExecutor = Executors.newSingleThreadExecutor()
+    }
+
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { sendFile(it) }
+    }
+
+    private fun sendFile(uri: Uri) {
+        val sender = Sender(binding, baseContext, imageAnalysis, uri)
+        imageAnalysis.setAnalyzer(cameraExecutor, sender)
+        sender.send()
+        startCamera(imageAnalysis)
     }
 }
