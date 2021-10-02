@@ -1,6 +1,7 @@
 package com.example.qrft
 
 import android.content.Context
+import android.os.Environment
 import android.widget.Toast
 import androidx.camera.core.ImageAnalysis
 import com.example.qrft.databinding.ActivityMainBinding
@@ -9,7 +10,8 @@ import java.io.File
 class Receiver(
     binding: ActivityMainBinding,
     private val context: Context,
-    private val imageAnalysis: ImageAnalysis
+    private val imageAnalysis: ImageAnalysis,
+    private val downloadPath: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 ) : QRCodeHandler(binding) {
     companion object {
         private const val LAST_SEQUENCE_NUMBER = 2
@@ -41,7 +43,7 @@ class Receiver(
     }
 
     private fun handleTitle(fileTitle: String) {
-        this.file = File(fileTitle)
+        this.file = File(downloadPath, fileTitle)
         if(!file.isFile && !file.isDirectory) {
             file.createNewFile()
         }
