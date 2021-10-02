@@ -30,7 +30,7 @@ class Sender(
     private fun sendNextChunk() {
         val offset = currChunkNumber * QRCODE_SIZE
         setSequenceNumber(offset)
-        this.generateQRCode(readTextChunk(file, offset))
+        this.generateQRCode(sequenceNumber.toString() + readTextChunk(file, offset))
 
         currChunkNumber ++
     }
