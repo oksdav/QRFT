@@ -14,19 +14,20 @@ class Receiver(
     private val downloadPath: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 ) : QRCodeHandler(binding) {
     companion object {
+        private const val TITLE_SEQUENCE_NUMBER = 3
         private const val LAST_SEQUENCE_NUMBER = 2
     }
 
-    private var isHandledTitle = false
     private var sequenceNumber = 0
     private lateinit var file: File
 
     override fun handleScannedQRCode(contents: String) {
         val (sequenceNumber, data) = extractSequenceNumber(contents)
         Toast.makeText(context, "Sequence number: $sequenceNumber | Data: $data", Toast.LENGTH_SHORT).show()
-        if (!isHandledTitle) {
-            handleTitle(contents)
-        } else when (sequenceNumber) {
+        when (sequenceNumber) {
+            TITLE_SEQUENCE_NUMBER -> {
+                handleTitle(contents)
+            }
             LAST_SEQUENCE_NUMBER -> {
                 handleChunk(data, LAST_SEQUENCE_NUMBER)
                 Toast.makeText(context, "Finished reading file", Toast.LENGTH_LONG).show()
@@ -47,7 +48,6 @@ class Receiver(
         if(!file.isFile && !file.isDirectory) {
             file.createNewFile()
         }
-        this.isHandledTitle = true
         generateQRCode(sequenceNumber.toString())
     }
 

@@ -7,6 +7,7 @@ class Sender(
     binding: ActivityMainBinding
 ) : QRCodeHandler(binding) {
     companion object {
+        private const val TITLE_SEQUENCE_NUMBER = 3
         private const val LAST_SEQUENCE_NUMBER = 2
         private const val QRCODE_SIZE = 40
     }
@@ -18,7 +19,7 @@ class Sender(
 
     fun send(file: File) {
         this.file = file
-        this.generateQRCode(file.name)
+        this.generateQRCode(TITLE_SEQUENCE_NUMBER.toString() + file.name)
     }
 
     override fun handleScannedQRCode(contents: String) {
