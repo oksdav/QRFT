@@ -23,10 +23,14 @@ class Receiver(
 
     override fun handleScannedQRCode(contents: String) {
         val (sequenceNumber, data) = extractSequenceNumber(contents)
-        Toast.makeText(context, "Sequence number: $sequenceNumber | Data: $data", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            context,
+            "Sequence number: $sequenceNumber | Data: $data",
+            Toast.LENGTH_SHORT
+        ).show()
         when (sequenceNumber) {
             TITLE_SEQUENCE_NUMBER -> {
-                handleTitle(contents)
+                handleTitle(data)
             }
             LAST_SEQUENCE_NUMBER -> {
                 handleChunk(data, LAST_SEQUENCE_NUMBER)
@@ -45,7 +49,7 @@ class Receiver(
 
     private fun handleTitle(fileTitle: String) {
         this.file = File(downloadPath, fileTitle)
-        if(!file.isFile && !file.isDirectory) {
+        if (!file.isFile && !file.isDirectory) {
             file.createNewFile()
         }
         generateQRCode(sequenceNumber.toString())

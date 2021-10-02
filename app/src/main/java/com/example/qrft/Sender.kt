@@ -1,10 +1,12 @@
 package com.example.qrft
 
+import androidx.camera.core.ImageAnalysis
 import com.example.qrft.databinding.ActivityMainBinding
 import java.io.File
 
 class Sender(
-    binding: ActivityMainBinding
+    binding: ActivityMainBinding,
+    private val imageAnalysis: ImageAnalysis,
 ) : QRCodeHandler(binding) {
     companion object {
         private const val TITLE_SEQUENCE_NUMBER = 3
@@ -14,7 +16,7 @@ class Sender(
 
     private var sequenceNumber = 1
     private var currChunkNumber = 0
-    private lateinit var file : File
+    private lateinit var file: File
 
 
     fun send(file: File) {
@@ -33,20 +35,21 @@ class Sender(
         setSequenceNumber(offset)
         this.generateQRCode(sequenceNumber.toString() + readTextChunk(file, offset))
 
-        currChunkNumber ++
+        currChunkNumber++
     }
 
     private fun setSequenceNumber(offset: Int) {
-        sequenceNumber = if (file.length() <= offset + QRCODE_SIZE) {
-            LAST_SEQUENCE_NUMBER
+        if (file.length() <= offset + QRCODE_SIZE) {
+            sequenceNumber = LAST_SEQUENCE_NUMBER
+            imageAnalysis.clearAnalyzer()
         } else {
-            1 - sequenceNumber
+            sequenceNumber = 1 - sequenceNumber
         }
     }
 
     private fun readTextChunk(file: File, offset: Int): String {
-        val retChunk: CharArray = charArrayOf()
-        if(file.exists() && file.isFile) {
+        val retChunk = CharArray(QRCODE_SIZE)
+        if (file.exists() && file.isFile) {
             file.bufferedReader().read(retChunk, offset, QRCODE_SIZE)
         }
         return retChunk.toString()
