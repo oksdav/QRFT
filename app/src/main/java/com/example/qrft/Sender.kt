@@ -22,7 +22,7 @@ class Sender(
     }
 
     override fun handleScannedQRCode(contents: String) {
-        if (sequenceNumber.toString() == contents) {
+        if (sequenceNumber.toString() != contents) {
             sendNextChunk()
         }
     }
