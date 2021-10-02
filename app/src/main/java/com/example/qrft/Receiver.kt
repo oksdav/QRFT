@@ -6,20 +6,21 @@ import android.widget.Toast
 import androidx.camera.core.ImageAnalysis
 import com.example.qrft.databinding.ActivityMainBinding
 import java.io.File
+import java.io.OutputStream
 
 class Receiver(
     binding: ActivityMainBinding,
     private val context: Context,
     private val imageAnalysis: ImageAnalysis,
-    private val downloadPath: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 ) : QRCodeHandler(binding) {
     companion object {
-        private const val TITLE_SEQUENCE_NUMBER = 3
-        private const val LAST_SEQUENCE_NUMBER = 2
+        private const val FIRST_SEQUENCE_NUMBER = 2
+        private const val LAST_SEQUENCE_NUMBER = 3
     }
 
+    private lateinit var outputStream: OutputStream
+    private var isFileCreated = false
     private var sequenceNumber = 0
-    private lateinit var file: File
 
     override fun handleScannedQRCode(contents: String) {
         val (sequenceNumber, data) = extractSequenceNumber(contents)
@@ -29,8 +30,10 @@ class Receiver(
             Toast.LENGTH_SHORT
         ).show()
         when (sequenceNumber) {
-            TITLE_SEQUENCE_NUMBER -> {
-                handleTitle(data)
+            FIRST_SEQUENCE_NUMBER -> {
+                if (!isFileCreated) {
+                    createFile(data)
+                }
             }
             LAST_SEQUENCE_NUMBER -> {
                 handleChunk(data, LAST_SEQUENCE_NUMBER)
@@ -47,17 +50,27 @@ class Receiver(
         return Pair(contents.take(1).toInt(), contents.drop(1))
     }
 
-    private fun handleTitle(fileTitle: String) {
-        this.file = File(downloadPath, fileTitle)
-        if (!file.isFile && !file.isDirectory) {
-            file.createNewFile()
+    private fun createFile(name: String) {
+        val downloadPath: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val filename = File(name)
+
+        var file = File(downloadPath, name)
+        isFileCreated = file.createNewFile()
+        var fileDuplicateNameNumber = 1
+
+        while (!isFileCreated) {
+            file = File(downloadPath, "${filename.nameWithoutExtension}-$fileDuplicateNameNumber.${filename.extension}")
+            isFileCreated = file.createNewFile()
+            fileDuplicateNameNumber++
         }
+
+        outputStream = file.outputStream()
         generateQRCode(sequenceNumber.toString())
     }
 
     private fun handleChunk(data: String, nextSequenceNumber: Int) {
-        file.outputStream().write(data.toByteArray())
-        this.sequenceNumber = nextSequenceNumber
-        generateQRCode(nextSequenceNumber.toString())
+        outputStream.write(data.toByteArray())
+        sequenceNumber = nextSequenceNumber
+        generateQRCode(sequenceNumber.toString())
     }
 }

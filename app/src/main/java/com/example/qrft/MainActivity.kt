@@ -1,9 +1,8 @@
 package com.example.qrft
 
 import android.Manifest
-import android.app.Activity
-import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,20 +15,18 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.qrft.databinding.ActivityMainBinding
-import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-
 
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var imageAnalysis: ImageAnalysis
-    private lateinit var chosenFile: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,9 +79,8 @@ class MainActivity : AppCompatActivity() {
         imageAnalysis = ImageAnalysis.Builder().build()
 
         if (allPermissionsGranted()) {
-            chooseAndSendFile()
-        }
-        else {
+            getContent.launch("*/*")
+        } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
 
@@ -106,28 +102,14 @@ class MainActivity : AppCompatActivity() {
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-    private fun chooseAndSendFile() {
-        var chooseFile = Intent(Intent.ACTION_GET_CONTENT)
-        chooseFile.type = "*/*"
-        chooseFile = Intent.createChooser(chooseFile, "Choose a file")
-        resultLauncher.launch(chooseFile)
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { sendFile(it) }
     }
 
-    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data: Intent? = result.data
-            val resultFile = data?.data?.path
-            if (resultFile != null) {
-                chosenFile = File(resultFile)
-                sendFile()
-            }
-        }
-    }
-
-    private fun sendFile() {
-        val sender = Sender(binding, imageAnalysis)
+    private fun sendFile(uri: Uri) {
+        val sender = Sender(binding, baseContext, imageAnalysis, uri)
         imageAnalysis.setAnalyzer(cameraExecutor, sender)
-        sender.send(chosenFile)
+        sender.send()
         startCamera(imageAnalysis)
     }
 }
