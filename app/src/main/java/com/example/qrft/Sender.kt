@@ -13,7 +13,7 @@ class Sender(
     context: Context,
     imageAnalysis: ImageAnalysis,
     uri: Uri
-) : QRCodeHandler(binding, context, imageAnalysis) {
+) : Communicator(binding, context, imageAnalysis) {
     companion object {
         private const val FILE_CHUNK_SIZE = 333
     }

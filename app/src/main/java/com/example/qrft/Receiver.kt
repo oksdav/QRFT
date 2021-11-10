@@ -18,7 +18,7 @@ class Receiver(
     binding: ActivityMainBinding,
     private val context: Context,
     imageAnalysis: ImageAnalysis
-) : QRCodeHandler(binding, context, imageAnalysis) {
+) : Communicator(binding, context, imageAnalysis) {
     private lateinit var outputStream: OutputStream
     private var isFileCreated = false
     private var sequenceNumber = 0

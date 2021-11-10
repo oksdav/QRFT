@@ -19,7 +19,7 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 
-abstract class QRCodeHandler(
+abstract class Communicator(
     private val binding: ActivityMainBinding,
     private val context: Context,
     private val imageAnalysis: ImageAnalysis
