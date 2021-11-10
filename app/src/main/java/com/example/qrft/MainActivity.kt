@@ -2,17 +2,14 @@ package com.example.qrft
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.qrft.databinding.ActivityMainBinding
 import java.util.concurrent.ExecutorService
@@ -20,8 +17,11 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
     companion object {
-        private const val REQUEST_CODE_PERMISSIONS = 10
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+        private val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -30,8 +30,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!allPermissionsGranted()) {
+            requestPermission.launch(REQUIRED_PERMISSIONS)
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        cameraExecutor = Executors.newSingleThreadExecutor()
+        imageAnalysis = ImageAnalysis.Builder().build()
     }
 
     override fun onDestroy() {
@@ -39,23 +46,16 @@ class MainActivity : AppCompatActivity() {
         cameraExecutor.shutdown()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted()) {
-                startCamera(imageAnalysis)
-            } else {
-                Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-        }
-    }
-
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun startCamera(imageAnalysis: ImageAnalysis) {
+    private fun startAnalyzer(analyzer: ImageAnalysis.Analyzer) {
+        binding.receiveFile.visibility = View.GONE
+        binding.sendFile.visibility = View.GONE
+
+        imageAnalysis.setAnalyzer(cameraExecutor, analyzer)
+
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
@@ -69,47 +69,36 @@ class MainActivity : AppCompatActivity() {
                 // Bind use cases to camera
                 cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_FRONT_CAMERA, imageAnalysis)
             } catch (ex: Exception) {
-                Log.e(this.toString(), "Use case binding failed", ex)
+                Log.e(toString(), "Use case binding failed", ex)
             }
         }, ContextCompat.getMainExecutor(this))
     }
 
-    fun onSend(@Suppress("UNUSED_PARAMETER") view: View) {
-        cameraExecutor = Executors.newSingleThreadExecutor()
-        imageAnalysis = ImageAnalysis.Builder().build()
-
+    fun onReceive(@Suppress("UNUSED_PARAMETER") view: View) {
         if (allPermissionsGranted()) {
+            binding.qrcode.setImageDrawable(null)
+            startAnalyzer(Receiver(binding, baseContext, imageAnalysis))
+        } else {
+            requestPermission.launch(REQUIRED_PERMISSIONS)
+        }
+    }
+
+    fun onSend(@Suppress("UNUSED_PARAMETER") view: View) {
+        if (allPermissionsGranted()) {
+            binding.qrcode.setImageDrawable(null)
             getContent.launch("*/*")
         } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+            requestPermission.launch(REQUIRED_PERMISSIONS)
         }
-
-        cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-    fun onReceive(@Suppress("UNUSED_PARAMETER") view: View) {
-        cameraExecutor = Executors.newSingleThreadExecutor()
-        imageAnalysis = ImageAnalysis.Builder().build()
-        val receiver = Receiver(binding, baseContext, imageAnalysis)
-        imageAnalysis.setAnalyzer(cameraExecutor, receiver)
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
+        startAnalyzer(Sender(binding, baseContext, imageAnalysis, it))
+    }
 
-        if (allPermissionsGranted()) {
-            startCamera(imageAnalysis)
-        } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+    private val requestPermission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        if (it.any { permission -> !permission.value }) {
+            finish()
         }
-
-        cameraExecutor = Executors.newSingleThreadExecutor()
-    }
-
-    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let { sendFile(it) }
-    }
-
-    private fun sendFile(uri: Uri) {
-        val sender = Sender(binding, baseContext, imageAnalysis, uri)
-        imageAnalysis.setAnalyzer(cameraExecutor, sender)
-        sender.send()
-        startCamera(imageAnalysis)
     }
 }

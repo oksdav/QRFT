@@ -1,64 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/ScrollView01"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.qrft.MainActivity">
 
-    <RelativeLayout
+    <ImageView
+        android:id="@+id/qrcode"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="256dp"
+        android:contentDescription="@string/qrcode"
+        app:layout_constraintBottom_toTopOf="@+id/receiveFile"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/qrcode" />
+
+    <Button
+        android:id="@+id/receiveFile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:context=".MainActivity"
-        tools:ignore="ExtraText">
+        android:onClick="onReceive"
+        android:text="@string/receive_file"
+        app:layout_constraintBottom_toTopOf="@+id/sendFile"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="UsingOnClickInXml" />
 
-        <ImageView
-            android:id="@+id/qrcode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/qrcode"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/qrcode" />
+    <Button
+        android:id="@+id/sendFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onSend"
+        android:text="@string/send_file"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="UsingOnClickInXml" />
 
-
-        <Button
-            android:id="@+id/sendFile"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/qrcode"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="394dp"
-            android:layout_marginBottom="5dp"
-            android:background="@android:color/holo_orange_light"
-            android:onClick="onSend"
-            android:text="@string/send_file"
-            android:textColor="@android:color/background_dark"
-            android:textStyle="bold"
-            tools:ignore="UsingOnClickInXml"
-            tools:layout_editor_absoluteX="151dp"
-            tools:layout_editor_absoluteY="200dp" />
-
-        <Button
-            android:id="@+id/receiveFile"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/qrcode"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="331dp"
-            android:layout_marginEnd="-411dp"
-            android:layout_marginBottom="5dp"
-            android:layout_toStartOf="@+id/sendFile"
-            android:background="@android:color/holo_orange_light"
-            android:onClick="onReceive"
-            android:text="@string/receive_a_file"
-            android:textColor="@android:color/background_dark"
-            android:textStyle="bold"
-            tools:ignore="UsingOnClickInXml"
-            tools:layout_editor_absoluteX="151dp"
-            tools:layout_editor_absoluteY="200dp" />
-
-    </RelativeLayout>
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
