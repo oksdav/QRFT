@@ -1,15 +1,14 @@
 package com.example.qrft
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import com.example.qrft.databinding.ActivityMainBinding
+import com.google.android.material.snackbar.Snackbar
 import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -21,7 +20,6 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 
 abstract class Communicator(
     private val binding: ActivityMainBinding,
-    private val context: Context,
     private val imageAnalysis: ImageAnalysis
 ) : ImageAnalysis.Analyzer {
     companion object {
@@ -29,7 +27,7 @@ abstract class Communicator(
         const val LAST_SEQUENCE_NUMBER = 3
     }
 
-    private val qrCodeSize = context.resources.displayMetrics.widthPixels
+    private val qrCodeSize = binding.qrcode.width
     private val qrCodeHints = mapOf(EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.L)
 
     @SuppressLint("UnsafeOptInUsageError")
@@ -79,6 +77,6 @@ abstract class Communicator(
         imageAnalysis.clearAnalyzer()
         binding.receiveFile.visibility = View.VISIBLE
         binding.sendFile.visibility = View.VISIBLE
-        Toast.makeText(context, "Finished transferring file", Toast.LENGTH_LONG).show()
+        Snackbar.make(binding.qrcode, "Finished transferring file", Snackbar.LENGTH_LONG).show()
     }
 }

@@ -18,7 +18,7 @@ class Receiver(
     binding: ActivityMainBinding,
     private val context: Context,
     imageAnalysis: ImageAnalysis
-) : Communicator(binding, context, imageAnalysis) {
+) : Communicator(binding, imageAnalysis) {
     private lateinit var outputStream: OutputStream
     private var isFileCreated = false
     private var sequenceNumber = 0
