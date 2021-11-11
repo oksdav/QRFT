@@ -77,6 +77,6 @@ abstract class Communicator(
         imageAnalysis.clearAnalyzer()
         binding.receiveFile.visibility = View.VISIBLE
         binding.sendFile.visibility = View.VISIBLE
-        Snackbar.make(binding.qrcode, "Finished transferring file", Snackbar.LENGTH_LONG).show()
+        Snackbar.make(binding.qrcode, "Finished File Transfer", Snackbar.LENGTH_LONG).show()
     }
 }
