@@ -10,7 +10,6 @@
         android:id="@+id/qrcode"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="256dp"
         android:contentDescription="@string/qrcode"
         app:layout_constraintBottom_toTopOf="@+id/receiveFile"
         app:layout_constraintEnd_toEndOf="parent"

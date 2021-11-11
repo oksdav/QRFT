@@ -15,7 +15,7 @@ class Sender(
     uri: Uri
 ) : Communicator(binding, context, imageAnalysis) {
     companion object {
-        private const val FILE_CHUNK_SIZE = 333
+        private const val FILE_CHUNK_SIZE = 320
     }
 
     private var inputStream: InputStream

@@ -29,6 +29,9 @@ abstract class Communicator(
         const val LAST_SEQUENCE_NUMBER = 3
     }
 
+    private val qrCodeSize = context.resources.displayMetrics.widthPixels
+    private val qrCodeHints = mapOf(EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.L)
+
     @SuppressLint("UnsafeOptInUsageError")
     override fun analyze(image: ImageProxy) {
         val mediaImage = image.image
@@ -62,11 +65,7 @@ abstract class Communicator(
     protected abstract fun handleScannedQRCode(contents: String)
 
     protected fun generateQRCode(contents: String) {
-        val qrCodeSize = context.resources.displayMetrics.widthPixels
-        val hints = mapOf(
-            EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.L
-        )
-        val bitMatrix = QRCodeWriter().encode(contents, BarcodeFormat.QR_CODE, qrCodeSize, qrCodeSize, hints)
+        val bitMatrix = QRCodeWriter().encode(contents, BarcodeFormat.QR_CODE, qrCodeSize, qrCodeSize, qrCodeHints)
         val bitmap = Bitmap.createBitmap(qrCodeSize, qrCodeSize, Bitmap.Config.RGB_565)
         for (y in 0 until qrCodeSize) {
             for (x in 0 until qrCodeSize) {
