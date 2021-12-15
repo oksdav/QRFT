@@ -1,73 +1,60 @@
 package com.example.qrft
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Base64
 import androidx.camera.core.ImageAnalysis
 import com.example.qrft.databinding.ActivityMainBinding
-import java.io.BufferedReader
+import java.io.InputStream
 
 class Sender(
     binding: ActivityMainBinding,
-    private val context: Context,
-    private val imageAnalysis: ImageAnalysis,
-    private val uri: Uri
-) : QRCodeHandler(binding) {
+    context: Context,
+    imageAnalysis: ImageAnalysis,
+    uri: Uri
+) : Communicator(binding, imageAnalysis) {
     companion object {
-        private const val FIRST_SEQUENCE_NUMBER = 2
-        private const val LAST_SEQUENCE_NUMBER = 3
-        private const val QRCODE_SIZE = 40
+        private const val FILE_CHUNK_SIZE = 256
     }
 
-    private lateinit var bufferedReader: BufferedReader
-    private var fileSize: Long = 0
+    private var inputStream: InputStream
     private var sequenceNumber = 1
-    private var currChunkNumber = 0
 
-    @SuppressLint("Range")
-    fun send() {
-        val inputStream = context.contentResolver.openInputStream(uri)
-        if (inputStream != null) {
-            bufferedReader = inputStream.bufferedReader()
+    init {
+        val contentResolver = context.contentResolver
 
-            val cursor = context.contentResolver.query(uri, null, null, null, null)
-            if (cursor != null && cursor.moveToFirst()) {
-                val filename = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
-                fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
-                cursor.close()
-                this.generateQRCode(FIRST_SEQUENCE_NUMBER.toString() + filename)
-            }
+        inputStream = contentResolver.openInputStream(uri)!!
+
+        contentResolver.query(uri, null, null, null, null)?.use {
+            it.moveToFirst()
+            val fileName = it.getString(it.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
+            generateQRCode(FIRST_SEQUENCE_NUMBER.toString() + fileName)
         }
     }
 
     override fun handleScannedQRCode(contents: String) {
-        if (sequenceNumber.toString() != contents) {
-            sendNextChunk()
+        when (contents.toInt()) {
+            LAST_SEQUENCE_NUMBER -> finishFileTransfer()
+            (1 - sequenceNumber) -> sendFileChunk()
         }
     }
 
-    private fun sendNextChunk() {
-        val offset = currChunkNumber * QRCODE_SIZE
-        setSequenceNumber(offset)
-        this.generateQRCode(sequenceNumber.toString() + readTextChunk(offset))
-        currChunkNumber++
-    }
+    private fun sendFileChunk() {
+        val (fileChunk, endOfFile) = readFileChunk()
 
-    private fun setSequenceNumber(offset: Int) {
-        sequenceNumber = if (fileSize <= offset + QRCODE_SIZE) {
-            imageAnalysis.clearAnalyzer()
+        sequenceNumber = if (endOfFile) {
             LAST_SEQUENCE_NUMBER
         } else {
             1 - sequenceNumber
         }
+
+        generateQRCode(sequenceNumber.toString() + fileChunk)
     }
 
-    private fun readTextChunk(offset: Int): String {
-        val fileChunk = CharArray(QRCODE_SIZE)
-        bufferedReader.read(fileChunk, offset, QRCODE_SIZE)
-        return String(fileChunk).trimEnd('\u0000')
+    private fun readFileChunk(): Pair<String, Boolean> {
+        val fileChunk = ByteArray(FILE_CHUNK_SIZE)
+        val endOfFile = inputStream.read(fileChunk, 0, FILE_CHUNK_SIZE) == -1
+        return Pair(Base64.encodeToString(fileChunk, Base64.DEFAULT), endOfFile)
     }
 }
-
-
