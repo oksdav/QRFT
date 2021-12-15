@@ -28,6 +28,7 @@ abstract class Communicator(
     }
 
     private val qrCodeSize = binding.qrcode.width
+    private var currentChunkNumber: Int = 0
     private val qrCodeHints = mapOf(EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.L)
 
     @SuppressLint("UnsafeOptInUsageError")
@@ -71,6 +72,8 @@ abstract class Communicator(
             }
         }
         binding.qrcode.setImageBitmap(bitmap)
+        currentChunkNumber++
+        binding.chunkNumber.text = currentChunkNumber.toString()
     }
 
     protected fun finishFileTransfer() {

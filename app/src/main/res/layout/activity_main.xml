@@ -6,6 +6,17 @@
     android:layout_height="match_parent"
     tools:context="com.example.qrft.MainActivity">
 
+    <TextView
+        android:id="@+id/chunkNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:textSize="60sp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/qrcode"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:id="@+id/qrcode"
         android:layout_width="match_parent"
@@ -13,8 +24,7 @@
         android:contentDescription="@string/qrcode"
         app:layout_constraintBottom_toTopOf="@+id/receiveFile"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="@id/chunkNumber"
         app:srcCompat="@drawable/qrcode" />
 
     <Button
