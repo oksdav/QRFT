@@ -4,8 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Base64
+import android.view.View
 import androidx.camera.core.ImageAnalysis
 import com.example.qrft.databinding.ActivityMainBinding
+import com.google.android.material.slider.Slider
 import java.io.InputStream
 
 class Sender(
@@ -14,12 +16,9 @@ class Sender(
     imageAnalysis: ImageAnalysis,
     uri: Uri
 ) : Communicator(binding, imageAnalysis) {
-    companion object {
-        private const val FILE_CHUNK_SIZE = 256
-    }
-
     private var inputStream: InputStream
     private var sequenceNumber = 1
+    private var fileChunkSize: Int
 
     init {
         val contentResolver = context.contentResolver
@@ -31,6 +30,20 @@ class Sender(
             val fileName = it.getString(it.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
             generateQRCode(FIRST_SEQUENCE_NUMBER.toString() + fileName)
         }
+
+        val chunkSizeSlider = binding.chunkSize
+
+        fileChunkSize = chunkSizeSlider.value.toInt()
+
+        chunkSizeSlider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+            override fun onStartTrackingTouch(slider: Slider) {}
+
+            override fun onStopTrackingTouch(slider: Slider) {
+                fileChunkSize = slider.value.toInt()
+            }
+        })
+
+        chunkSizeSlider.visibility = View.VISIBLE
     }
 
     override fun handleScannedQRCode(contents: String) {
@@ -53,8 +66,8 @@ class Sender(
     }
 
     private fun readFileChunk(): Pair<String, Boolean> {
-        val fileChunk = ByteArray(FILE_CHUNK_SIZE)
-        val endOfFile = inputStream.read(fileChunk, 0, FILE_CHUNK_SIZE) == -1
+        val fileChunk = ByteArray(fileChunkSize)
+        val endOfFile = inputStream.read(fileChunk, 0, fileChunkSize) == -1
         return Pair(Base64.encodeToString(fileChunk, Base64.DEFAULT), endOfFile)
     }
 }
