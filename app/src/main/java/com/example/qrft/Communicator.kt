@@ -78,6 +78,7 @@ abstract class Communicator(
 
     protected fun finishFileTransfer() {
         imageAnalysis.clearAnalyzer()
+        binding.chunkSize.visibility = View.GONE
         binding.receiveFile.visibility = View.VISIBLE
         binding.sendFile.visibility = View.VISIBLE
         Snackbar.make(binding.qrcode, "Finished File Transfer", Snackbar.LENGTH_LONG).show()
